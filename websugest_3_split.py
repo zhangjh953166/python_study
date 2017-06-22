@@ -6,7 +6,6 @@ Created on 2017年6月21日
 '''
 import pandas as pd
 from sqlalchemy import create_engine
-from email.header import UTF8
 from configparser import ConfigParser
 
 cf = ConfigParser()
