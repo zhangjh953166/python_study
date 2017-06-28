@@ -3,6 +3,10 @@
 Created on 2017年6月26日
 
 @author: Administrator
+<![CDATA[
+ltj42NXSnMLcqLjd0O3m09fljZ7KosTZiPK6vbnwg4n0GgBUEzSe1uOooO3c1uTV8+qAv9Ch4eOP
+4aO9k+aEiv+N3Iac9diq+8fT27uO07iW4NXW7/Od8fSmidPewuDV8/hXAEtwSXpVdhtl2ur6
+]]>
 '''
 import logging
 
