@@ -31,10 +31,29 @@ database_name = cf.get("db","db_database")
 engine = create_engine('mysql+pymysql://'+user+':'+password+'@'+host+':'+port+'/'+database_name+'?charset=utf8')
 # sql = pd.read_sql('SELECT realIP,fullURL FROM train_v2_gzdata',engine,chunksize=1000)
 
-sql = pd.DataFrame([[2282069774,'http://www.lawtime.cn/ask/question_3335133.html'],
-                    ])
+i = pd.DataFrame([[1,'a.html'],
+                    [1,'b.html'],
+                    [1,'e.html'],
+                    [2,'b.html'],
+                    [2,'d.html'],
+                    [3,'a.html'],
+                    [3,'b.html'],
+                    [3,'c.html'],
+                    [3,'d.html'],
+                    [3,'e.html'],
+                    [4,'a.html'],
+                    [4,'b.html'],
+                    [4,'d.html'],
+                    [5,'a.html'],
+                    [5,'b.html'],
+                    [5,'e.html'],
+                    [6,'d.html'],
+                    [7,'a.html']
+                    ],
+               columns=['realIP','fullURL'])
 
-def create_array(url,ip):
+def create_array(url,ip,data):
+    '''
     url_size = url.size # 因为url的元素个数会随着np.zeros增长
     for index,row in ip.iterrows():
         ip_str = str(row['realIP']) #因为row['realip']得到的数据类型是INt
@@ -46,21 +65,31 @@ def create_array(url,ip):
                 if match_array.values[match] :
                     url.loc[match_array.index[match],(ip_str)]=1# 不能使用[][]进行赋值，因为这是query会复制查询结果。所以赋值并不会真正生效
     return url
+    '''
+    train_data_matrix = np.zeros((url.size,ip.size))
+    for line in data.itertuples():
+        train_data_matrix[url.query('fullURL=="'+line[2]+'"').index[0],ip.query('realIP=='+str(line[1])).index[0]] = 1
+    return train_data_matrix
 
 import  sanmao.RecommenderV1
 logger.info('start load db')
 t = sanmao.RecommenderV1.Recommender() 
-for i in sql:
-    d = i[['fullURL']]
-    e = i[['realIP']]
-    f = create_array(d,e)
-    url_index = f[['fullURL']].iloc[:,0].values
-    del(f['fullURL'])
-    logger.info('load from db finish')
-    t.fit(f.as_matrix())
-    logger.info('fit model finish')
-    print(t.sim)
-    result = pd.DataFrame(t.sim,index=url_index,columns=url_index)
-    np.savetxt("sim_v2.csv", t.sim, fmt="%.2f",delimiter=",")
-    logger.info('save to file finish')
-    break
+# for i in sql:
+d = i[['fullURL']]
+e = i[['realIP']]
+d = d.drop_duplicates(subset=['fullURL'])
+d = pd.DataFrame(d.as_matrix(),columns=['fullURL'])
+e = e.drop_duplicates(subset=['realIP'])
+e = pd.DataFrame(e.as_matrix(),columns=['realIP'])
+f = create_array(d,e,i)
+# url_index = f[['fullURL']].iloc[:,0].values
+# del(f['fullURL'])
+# logger.info('load from db finish')
+# t.fit(f.as_matrix())
+t.fit(f)
+logger.info('fit model finish')
+print(t.sim)
+# result = pd.DataFrame(t.sim,index=d[['fullURL']].iloc[:,0].values,columns=d[['fullURL']].iloc[:,0].values)
+# np.savetxt("sim_v2.out", d[['fullURL']].iloc[:,0].values, fmt="%s",delimiter=",")
+np.savetxt("sim_v2.csv", t.sim, fmt="%.2f",delimiter=",", header=",".join(d[['fullURL']].iloc[:,0].values), comments="")
+logger.info('save to file finish')
